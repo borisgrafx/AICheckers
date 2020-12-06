@@ -19,7 +19,7 @@ public class DeskController implements Initializable {
             button23, button24, button25, button26, button27, button28, button29, button30, button31, button32;
     public CheckBox toggleAI;
 
-    private int id, previd;
+    private int id, previd, maxrating;
     public Button[] buttons;
     public Checker[] checkers;
     private boolean transBig = false, killStreak = false, canEat = false, blackMove = true;
@@ -326,11 +326,31 @@ public class DeskController implements Initializable {
         }
         final Random random = new Random();
         try {
-            List<Integer> keys = new ArrayList<>(waysToGo.keySet());
+            //Список возможных ходов и оценка их целесообразности
+            maxrating = Integer.MIN_VALUE;
+            List<List<Integer>> ratedOptions = new ArrayList<>();
+            for (Map.Entry<Integer, ArrayList<Integer>> entry : waysToGo.entrySet())
+                for (Integer value : entry.getValue()) {
+                    ratedOptions.add(rateOption(value, entry.getKey()));
+                    System.out.println(rateOption(value, entry.getKey()));
+                }
+            //Выборка лучшего варианта
+            List<Integer> whatToDo = new ArrayList<>();
+                int localid = 0;
+                int localprevid = 0;
+                for(List<Integer> curlist : ratedOptions)
+                    if (curlist.get(0) == maxrating) {
+                        localprevid = curlist.get(1);
+                        localid = curlist.get(2);
+                        System.out.println("Лучше схожу так " + localprevid + " " + localid + " потому что у него рейтинг " + curlist.get(0));
+                    }
+                id = localprevid;
+
+            /*List<Integer> keys = new ArrayList<>(waysToGo.keySet());
             int localprevid = keys.get(random.nextInt(keys.size()));
             keys = new ArrayList<>(waysToGo.get(localprevid));
             int localid = keys.get(random.nextInt(keys.size()));
-            id = localprevid;
+            id = localprevid;*/
             chooser('m');
             move(localid, localprevid);
             isthereAKillStreak(localid, localprevid);
@@ -355,10 +375,123 @@ public class DeskController implements Initializable {
             canEat = false;
             seeIfAnythingsEdible();
             clearColors();
-            Thread.sleep(2000);
-        } catch (RuntimeException | InterruptedException ignored) {
+        } catch (RuntimeException ignored) {
             System.out.println("I can't go on");
         }
+    }
+
+    private List<Integer> rateOption (int localid, int localprevid){
+        int rating = 0;
+        List<Integer> result = new ArrayList<>();
+        //Проверка, стоит ли сбоку
+        if (checkers[localprevid].getSpecialty2() == LeRi.Left || checkers[localprevid].getSpecialty2() == LeRi.Right) {
+            rating += 2;
+            System.out.println("Стоит сбоку");
+        }
+        //Проверка, идёт ли дамка во вражескую зону
+        if (checkers[localprevid].getWhChk() == 'x') {
+            boolean enemiesNearby  = false;
+            int i1; int i2;
+            if (localid <= 5) {
+                i1 = 0;
+                i2 = 9;
+            }  else if (localid >= 27) {
+                i1 = 21;
+                i2 = 31;
+            } else {
+                i1 = localid - 5;
+                i2 = localid + 5;
+            }
+
+            for (int i = i1; i <= i2; i++) {
+                if (checkers[i].getWhChk() == 'b' || checkers[i].getWhChk() == 'c') {
+                    enemiesNearby = true;
+                    break;
+                }
+            }
+            if (enemiesNearby) {
+                rating += 3;
+                System.out.println("Дамка, враги рядом");
+            }
+            else {
+                rating -= 3;
+                System.out.println("Дамка, врагов нет");
+            }
+        }
+        //Будет ли возможность убить врага в следующий раз
+        int a = id;
+        id = localid;
+        canEat = false;
+        chooser('m');
+        if (canEat) {
+            rating += 4;
+            System.out.println("Я прибью этих ублюдков");
+        }
+        canEat = false;
+        id = a;
+        //Съест ли меня враг после этого хода?
+        boolean willIbeEaten = false;
+        char rememberMe = checkers[localprevid].getWhChk();
+        checkers[localprevid].setWhChk('e');
+        checkers[localid].setWhChk('w');
+        blackMove = true;
+        canEat = false;
+        for (int i = 0; i < 32; i++) {
+            id = i;
+            if(checkers[i].getWhChk() == 'b' || checkers[i].getWhChk() == 'c')
+            chooser('m');
+        }
+        for (int i = 0; i < 32; i++) {
+            if (checkers[i].getColor() == 'b' && i == localid) {
+                willIbeEaten = true;
+                break;
+            }
+
+        }
+        if (willIbeEaten) {
+            rating -= 10;
+            System.out.println("Не лезь, оно тебя сожрёт!!!");
+        }
+        checkers[localid].setWhChk('e');
+        checkers[localprevid].setWhChk(rememberMe);
+        blackMove = false;
+        canEat = false;
+        clearColors();
+        id = a;
+        //Буду ли я съеден, если не сдвинусь с места
+        willIbeEaten = false;
+        blackMove = true;
+        canEat = false;
+        for (int i = 0; i < 32; i++) {
+            id = i;
+            if(checkers[i].getWhChk() == 'b' || checkers[i].getWhChk() == 'c')
+            chooser('m');
+        }
+        for (int i = 0; i < 32; i++) {
+            if (checkers[i].getColor() == 'b' && i == localprevid) {
+                willIbeEaten = true;
+                break;
+            }
+
+        }
+        int damkoef = 0;
+        if (checkers[localprevid].getWhChk() == 'x')
+            damkoef = 3;
+        if (willIbeEaten) {
+            rating += 7 + damkoef;
+            System.out.println("Вали-ка лучше отсюдова");
+        }
+        blackMove = false;
+        canEat = false;
+        clearColors();
+        id = a;
+
+        if (rating > maxrating)
+            maxrating = rating;
+        result.add(rating);
+        result.add(localprevid);
+        result.add(localid);
+        return result;
     }
 
     //Далее идут методы, связанные с тестированием
