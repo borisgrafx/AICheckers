@@ -81,7 +81,7 @@ public class DeskController implements Initializable {
                 id = id * 10 + Character.getNumericValue(source.charAt(i));
         }
         id--;
-        System.out.println(checkers[id].getSpecialty1() + " " + checkers[id].getSpecialty2() + " " + checkers[id].getSpecialty3());
+        //System.out.println(checkers[id].getSpecialty1() + " " + checkers[id].getSpecialty2() + " " + checkers[id].getSpecialty3());
         if (killStreak && checkers[id].getColor() != 'y')
             id = previd;
         if (checkers[id].getColor() == 'y') {
@@ -305,7 +305,6 @@ public class DeskController implements Initializable {
         }, 0, 1000);*/
 
 
-
         System.out.println("My turn, hmpf!");
         Map<Integer, ArrayList<Integer>> waysToGo = new HashMap<>();
         for (int i = 0; i < 32; i++) {
@@ -335,22 +334,18 @@ public class DeskController implements Initializable {
                     System.out.println(rateOption(value, entry.getKey()));
                 }
             //Выборка лучшего варианта
-            List<Integer> whatToDo = new ArrayList<>();
-                int localid = 0;
-                int localprevid = 0;
-                for(List<Integer> curlist : ratedOptions)
-                    if (curlist.get(0) == maxrating) {
-                        localprevid = curlist.get(1);
-                        localid = curlist.get(2);
-                        System.out.println("Лучше схожу так " + localprevid + " " + localid + " потому что у него рейтинг " + curlist.get(0));
-                    }
-                id = localprevid;
-
-            /*List<Integer> keys = new ArrayList<>(waysToGo.keySet());
-            int localprevid = keys.get(random.nextInt(keys.size()));
-            keys = new ArrayList<>(waysToGo.get(localprevid));
-            int localid = keys.get(random.nextInt(keys.size()));
-            id = localprevid;*/
+            int localid = 0;
+            int localprevid = 0;
+            for (List<Integer> curlist : ratedOptions)
+                if (curlist.get(0) == maxrating) {
+                    localprevid = curlist.get(1);
+                    localid = curlist.get(2);
+                    System.out.println("Лучше схожу так " + localprevid + " " + localid + " потому что у него рейтинг " + curlist.get(0));
+                }
+            if (localid == 0 && localprevid == 0)
+                System.out.println("Meh, I lost?");
+            id = localprevid;
+            clearColors();
             chooser('m');
             move(localid, localprevid);
             isthereAKillStreak(localid, localprevid);
@@ -380,22 +375,27 @@ public class DeskController implements Initializable {
         }
     }
 
-    private List<Integer> rateOption (int localid, int localprevid){
+    private List<Integer> rateOption(int localid, int localprevid) {
         int rating = 0;
         List<Integer> result = new ArrayList<>();
-        //Проверка, стоит ли сбоку
-        if (checkers[localprevid].getSpecialty2() == LeRi.Left || checkers[localprevid].getSpecialty2() == LeRi.Right) {
+        //Станет ли шашка дамкой?
+        if (checkers[localprevid].getWhChk() == 'w' && localprevid < 7)
+            rating += 4;
+            //Проверка, стоит ли сбоку
+        else if (checkers[localprevid].getSpecialty2() == LeRi.Left || checkers[localprevid].getSpecialty2() == LeRi.Right) {
             rating += 2;
-            System.out.println("Стоит сбоку");
+            System.out.println("Сбоку, сбоку заходи!!!");
         }
+
         //Проверка, идёт ли дамка во вражескую зону
         if (checkers[localprevid].getWhChk() == 'x') {
-            boolean enemiesNearby  = false;
-            int i1; int i2;
+            boolean enemiesNearby = false;
+            int i1;
+            int i2;
             if (localid <= 5) {
                 i1 = 0;
                 i2 = 9;
-            }  else if (localid >= 27) {
+            } else if (localid >= 27) {
                 i1 = 21;
                 i2 = 31;
             } else {
@@ -411,11 +411,10 @@ public class DeskController implements Initializable {
             }
             if (enemiesNearby) {
                 rating += 3;
-                System.out.println("Дамка, враги рядом");
-            }
-            else {
+                System.out.println("Дамка, враги рядом!");
+            } else {
                 rating -= 3;
-                System.out.println("Дамка, врагов нет");
+                System.out.println("Дамка, врагов нет!");
             }
         }
         //Будет ли возможность убить врага в следующий раз
@@ -430,50 +429,18 @@ public class DeskController implements Initializable {
         canEat = false;
         id = a;
         //Съест ли меня враг после этого хода?
-        boolean willIbeEaten = false;
         char rememberMe = checkers[localprevid].getWhChk();
         checkers[localprevid].setWhChk('e');
         checkers[localid].setWhChk('w');
-        blackMove = true;
-        canEat = false;
-        for (int i = 0; i < 32; i++) {
-            id = i;
-            if(checkers[i].getWhChk() == 'b' || checkers[i].getWhChk() == 'c')
-            chooser('m');
-        }
-        for (int i = 0; i < 32; i++) {
-            if (checkers[i].getColor() == 'b' && i == localid) {
-                willIbeEaten = true;
-                break;
-            }
-
-        }
+        boolean willIbeEaten = whosInDanger('y', localid);
         if (willIbeEaten) {
             rating -= 10;
             System.out.println("Не лезь, оно тебя сожрёт!!!");
         }
         checkers[localid].setWhChk('e');
         checkers[localprevid].setWhChk(rememberMe);
-        blackMove = false;
-        canEat = false;
-        clearColors();
-        id = a;
         //Буду ли я съеден, если не сдвинусь с места
-        willIbeEaten = false;
-        blackMove = true;
-        canEat = false;
-        for (int i = 0; i < 32; i++) {
-            id = i;
-            if(checkers[i].getWhChk() == 'b' || checkers[i].getWhChk() == 'c')
-            chooser('m');
-        }
-        for (int i = 0; i < 32; i++) {
-            if (checkers[i].getColor() == 'b' && i == localprevid) {
-                willIbeEaten = true;
-                break;
-            }
-
-        }
+        willIbeEaten = whosInDanger('y', localprevid);
         int damkoef = 0;
         if (checkers[localprevid].getWhChk() == 'x')
             damkoef = 3;
@@ -481,10 +448,25 @@ public class DeskController implements Initializable {
             rating += 7 + damkoef;
             System.out.println("Вали-ка лучше отсюдова");
         }
-        blackMove = false;
-        canEat = false;
-        clearColors();
+        //Проверка, ставлю ли я кого-нибудь под угрозу, если похожу. Или же спасу?
+        boolean dangerNow = whosInDanger('n', localprevid);
+        rememberMe = checkers[localprevid].getWhChk();
+        checkers[localprevid].setWhChk('e');
+        checkers[localid].setWhChk('w');
+        boolean dangerThen = whosInDanger('n', localid);
         id = a;
+        checkers[localid].setWhChk('e');
+        checkers[localprevid].setWhChk(rememberMe);
+        if (dangerNow && !dangerThen) {
+            rating += 6;
+            System.out.println("Слава спасителю!");
+        }
+        else if (!dangerNow && dangerThen) {
+            rating -= 6;
+            System.out.println("Попридержи-ка коней");
+        }
+
+
 
         if (rating > maxrating)
             maxrating = rating;
@@ -492,6 +474,29 @@ public class DeskController implements Initializable {
         result.add(localprevid);
         result.add(localid);
         return result;
+    }
+
+    //Есть ли кто-нибудь в опасности?
+    private boolean whosInDanger(char me, int localprevid) {
+        boolean danger = false;
+        blackMove = true;
+        canEat = false;
+        for (int i = 0; i < 32; i++) {
+            id = i;
+            if (checkers[i].getWhChk() == 'b' || checkers[i].getWhChk() == 'c')
+                chooser('m');
+        }
+        for (int i = 0; i < 32; i++) {
+            if ((me == 'n' && i != localprevid) || (me == 'y' && i == localprevid))
+            if (checkers[i].getColor() == 'b') {
+                danger = true;
+                break;
+            }
+        }
+        blackMove = false;
+        canEat = false;
+        clearColors();
+        return danger;
     }
 
     //Далее идут методы, связанные с тестированием
