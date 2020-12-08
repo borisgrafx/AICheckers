@@ -1,4 +1,3 @@
-/*
 package com.bb;
 
 import javafx.scene.control.Button;
@@ -119,4 +118,3 @@ class Tester {
         }
     }
 }
-*/

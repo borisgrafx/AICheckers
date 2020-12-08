@@ -52,6 +52,8 @@ public class Checker {
         }
     }
 
+
+
     //Меняет шашку, стоящую в клетке
     void imageChanger(Checker this, char name) {
         if (name != 'n' && name != 'e') {
@@ -153,5 +155,9 @@ public class Checker {
 
     public void setColor(char color) {
         this.color = color;
+    }
+
+    public void setBtn(Button btn) {
+        this.btn = btn;
     }
 }

@@ -8,10 +8,6 @@ import javafx.scene.control.CheckBox;
 
 import java.net.URL;
 import java.util.*;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DeskController implements Initializable {
     public Button button1, button2, button3, button4, button5, button6, button7, button8, button9, button10, button11,
@@ -49,6 +45,10 @@ public class DeskController implements Initializable {
     private void handleAI() {
         AI = toggleAI.isSelected();
         System.out.println(AI);
+        if (!blackMove) {
+            clearColors();
+            myTurn();
+        }
     }
 
     @Override
@@ -73,7 +73,7 @@ public class DeskController implements Initializable {
 
     //При нажатии на кнопку: позволяет выбрать шашку и посмотреть доступные для её перемещения клетки, вызвав метод chooser
     @FXML
-    private void buttonAction(ActionEvent event) throws InterruptedException {
+    private void buttonAction(ActionEvent event) {
         String source = event.getSource().toString();
         id = 0;
         for (int i = 0; i < source.length(); i++) {
@@ -334,19 +334,25 @@ public class DeskController implements Initializable {
                     System.out.println(rateOption(value, entry.getKey()));
                 }
             //Выборка лучшего варианта
-            int localid = 0;
-            int localprevid = 0;
+            int localid;
+            int localprevid;
+            ArrayList<Integer> from = new ArrayList<>();
+            ArrayList<Integer> to = new ArrayList<>();
             for (List<Integer> curlist : ratedOptions)
                 if (curlist.get(0) == maxrating) {
-                    localprevid = curlist.get(1);
-                    localid = curlist.get(2);
-                    System.out.println("Лучше схожу так " + localprevid + " " + localid + " потому что у него рейтинг " + curlist.get(0));
+                    from.add(curlist.get(1));
+                    to.add(curlist.get(2));
                 }
+            int bestWay = random.nextInt(from.size());
+            localprevid = from.get(bestWay);
+            localid = to.get(bestWay);
+            System.out.println("Лучше схожу так " + localprevid + " " + localid + " потому что у него рейтинг " + maxrating);
             if (localid == 0 && localprevid == 0)
                 System.out.println("Meh, I lost?");
             id = localprevid;
             clearColors();
-            chooser('m');
+            //изменить на 'm'
+            chooser('s');
             move(localid, localprevid);
             isthereAKillStreak(localid, localprevid);
             while (killStreak) {
@@ -379,14 +385,18 @@ public class DeskController implements Initializable {
         int rating = 0;
         List<Integer> result = new ArrayList<>();
         //Станет ли шашка дамкой?
-        if (checkers[localprevid].getWhChk() == 'w' && localprevid < 7)
+        if (checkers[localprevid].getWhChk() == 'w' && localprevid <= 7)
             rating += 4;
             //Проверка, стоит ли сбоку
         else if (checkers[localprevid].getSpecialty2() == LeRi.Left || checkers[localprevid].getSpecialty2() == LeRi.Right) {
             rating += 2;
             System.out.println("Сбоку, сбоку заходи!!!");
         }
-
+        //Если не дамка, то стимулирует продвигаться вперёд
+        if (checkers[localprevid].getWhChk() == 'w') {
+            rating += 1;
+            System.out.println("Вперёд, малой!");
+        }
         //Проверка, идёт ли дамка во вражескую зону
         if (checkers[localprevid].getWhChk() == 'x') {
             boolean enemiesNearby = false;
@@ -410,10 +420,10 @@ public class DeskController implements Initializable {
                 }
             }
             if (enemiesNearby) {
-                rating += 3;
+                rating += 1;
                 System.out.println("Дамка, враги рядом!");
             } else {
-                rating -= 3;
+                rating -= 1;
                 System.out.println("Дамка, врагов нет!");
             }
         }
@@ -429,44 +439,41 @@ public class DeskController implements Initializable {
         canEat = false;
         id = a;
         //Съест ли меня враг после этого хода?
+        List<Integer> endangered;
         char rememberMe = checkers[localprevid].getWhChk();
         checkers[localprevid].setWhChk('e');
         checkers[localid].setWhChk('w');
-        boolean willIbeEaten = whosInDanger('y', localid);
-        if (willIbeEaten) {
-            rating -= 10;
+        endangered = whosInDanger('y', localid);
+        if (endangered.size() != 0) {
+            rating -= 11;
             System.out.println("Не лезь, оно тебя сожрёт!!!");
         }
         checkers[localid].setWhChk('e');
         checkers[localprevid].setWhChk(rememberMe);
         //Буду ли я съеден, если не сдвинусь с места
-        willIbeEaten = whosInDanger('y', localprevid);
+        endangered = whosInDanger('y', localprevid);
         int damkoef = 0;
         if (checkers[localprevid].getWhChk() == 'x')
-            damkoef = 3;
-        if (willIbeEaten) {
+            damkoef = 4;
+        if (endangered.size() != 0) {
             rating += 7 + damkoef;
             System.out.println("Вали-ка лучше отсюдова");
         }
         //Проверка, ставлю ли я кого-нибудь под угрозу, если похожу. Или же спасу?
-        boolean dangerNow = whosInDanger('n', localprevid);
+        endangered = whosInDanger('n', localprevid);
         rememberMe = checkers[localprevid].getWhChk();
         checkers[localprevid].setWhChk('e');
         checkers[localid].setWhChk('w');
-        boolean dangerThen = whosInDanger('n', localid);
+        if (endangered.size() > whosInDanger('n', localid).size()) {
+            rating += 7;
+            System.out.println("Слава спасителю!");
+        } else if (endangered.size() < whosInDanger('n', localid).size()) {
+            rating -= 7;
+            System.out.println("Попридержи-ка коней");
+        }
         id = a;
         checkers[localid].setWhChk('e');
         checkers[localprevid].setWhChk(rememberMe);
-        if (dangerNow && !dangerThen) {
-            rating += 6;
-            System.out.println("Слава спасителю!");
-        }
-        else if (!dangerNow && dangerThen) {
-            rating -= 6;
-            System.out.println("Попридержи-ка коней");
-        }
-
-
 
         if (rating > maxrating)
             maxrating = rating;
@@ -476,9 +483,9 @@ public class DeskController implements Initializable {
         return result;
     }
 
-    //Есть ли кто-нибудь в опасности?
-    private boolean whosInDanger(char me, int localprevid) {
-        boolean danger = false;
+    //Кто-нибудь (или я) в опасности?
+    private List<Integer> whosInDanger(char me, int localprevid) {
+        List<Integer> danger = new ArrayList<>();
         blackMove = true;
         canEat = false;
         for (int i = 0; i < 32; i++) {
@@ -488,10 +495,10 @@ public class DeskController implements Initializable {
         }
         for (int i = 0; i < 32; i++) {
             if ((me == 'n' && i != localprevid) || (me == 'y' && i == localprevid))
-            if (checkers[i].getColor() == 'b') {
-                danger = true;
-                break;
-            }
+                if (checkers[i].getColor() == 'b') {
+                    danger.add(i);
+                    break;
+                }
         }
         blackMove = false;
         canEat = false;
@@ -502,39 +509,15 @@ public class DeskController implements Initializable {
     //Далее идут методы, связанные с тестированием
 
     //Создание поля с кастомной расстановкой шашек
-    /*public void myWorld(char[] checko) {
-        Button button1 = new Button();
-        Button button2 = new Button();
-        Button button3 = new Button();
-        Button button4 = new Button();
-        Button button5 = new Button();
-        Button button6 = new Button();
-        Button button7 = new Button();
-        Button button8 = new Button();
-        Button button9 = new Button();
-        Button button10 = new Button();
-        Button button11 = new Button();
-        Button button12 = new Button();
-        Button button13 = new Button();
-        Button button14 = new Button();
-        Button button15 = new Button();
-        Button button16 = new Button();
-        Button button17 = new Button();
-        Button button18 = new Button();
-        Button button19 = new Button();
-        Button button20 = new Button();
-        Button button21 = new Button();
-        Button button22 = new Button();
-        Button button23 = new Button();
-        Button button24 = new Button();
-        Button button25 = new Button();
-        Button button26 = new Button();
-        Button button27 = new Button();
-        Button button28 = new Button();
-        Button button29 = new Button();
-        Button button30 = new Button();
-        Button button31 = new Button();
-        Button button32 = new Button();
+    public void myWorld(char[] checko) {
+        Button button1 = new Button(), button2 = new Button(), button3 = new Button(), button4 = new Button(),
+                button5 = new Button(), button6 = new Button(), button7 = new Button(), button8 = new Button(),
+                button9 = new Button(), button10 = new Button(), button11 = new Button(), button12 = new Button(),
+                button13 = new Button(), button14 = new Button(), button15 = new Button(), button16 = new Button(),
+                button17 = new Button(), button18 = new Button(), button19 = new Button(), button20 = new Button(),
+                button21 = new Button(), button22 = new Button(), button23 = new Button(), button24 = new Button(),
+                button25 = new Button(), button26 = new Button(), button27 = new Button(), button28 = new Button(),
+                button29 = new Button(), button30 = new Button(), button31 = new Button(), button32 = new Button();
         buttons = new Button[]{button1, button2, button3, button4, button5, button6, button7, button8,
                 button9, button10, button11, button12, button13, button14, button15, button16, button17, button18,
                 button19, button20, button21, button22, button23, button24, button25, button26, button27, button28,
@@ -542,21 +525,19 @@ public class DeskController implements Initializable {
         checkers = new Checker[32];
         newGame();
         for (int i = 0; i < checko.length; i++) {
-            checkers[i] = new Checker(checko[i], 'g', buttons[i]);
+            checkers[i].setWhChk(checko[i]);
+            checkers[i].setBtn(buttons[i]);
+            checkers[i].imageChanger(checko[i]);
+
         }
         for (int i = checko.length; i < 32; i++) {
-            checkers[i] = new Checker('e', 'g', buttons[i]);
+            checkers[i].setWhChk('e');
+            checkers[i].setBtn(buttons[i]);
         }
         for (int i = 0; i < checko.length; i++) {
             checkers[i].setWhChk(checko[i]);
         }
-        for (int i = 0; i < 12; i++)
-            checkers[i].imageChanger(checko[i]);
-        for (int i = 12; i < 20; i++)
-            checkers[i].imageChanger(checko[i]);
-        for (int i = 20; i < 32; i++)
-            checkers[i].imageChanger(checko[i]);
-    }*/
+    }
 
     //Возвращает информацию о содержании всех зелёных клеток в виде массива
     public char[] getCheckers() {
