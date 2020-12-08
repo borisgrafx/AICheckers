@@ -81,7 +81,7 @@ public class Checker {
         return specialty3;
     }
 
-    static Checker[] makeYourself(Checker checkers[], Button buttons[]) {
+    static void makeYourself(Checker[] checkers, Button[] buttons) {
         for (int i = 0; i < 12; i++) {
             checkers[i] = new Checker('b', 'g', buttons[i], OdEv.NotSpecial, LeRi.NotSpecial, UpDo.NotSpecial);
         }
@@ -126,7 +126,6 @@ public class Checker {
             checkers[i].btn.setGraphic(new ImageView());
         for (int i = 20; i < 32; i++)
             checkers[i].imageChanger('w');
-        return checkers;
     }
 
     public char getWhChk() {
