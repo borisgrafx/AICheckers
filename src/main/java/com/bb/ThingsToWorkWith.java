@@ -12,15 +12,15 @@ public class ThingsToWorkWith {
         int rating = 0;
         List<Integer> result = new ArrayList<>();
 
-
-
-
+        List<Integer> endangered;
+        char rememberMe;
+        int a = DeskController.id;
         //Станет ли шашка дамкой?
         if (checkers[localprevid].getWhChk() == 'w' && localprevid <= 7)
             rating += 4;
             //Проверка, стоит ли сбоку
         else if (checkers[localprevid].getSpecialty2() == DeskController.LeRi.Left || checkers[localprevid].getSpecialty2() == DeskController.LeRi.Right) {
-            rating += 2;
+            rating += 1;
             System.out.println("Сбоку, сбоку заходи!!!");
         }
         //Если не дамка, то стимулирует продвигаться вперёд
@@ -59,9 +59,7 @@ public class ThingsToWorkWith {
             }
         }
         //Будет ли возможность убить врага в следующий раз
-        List<Integer> endangered;
-        char rememberMe;
-        int a = DeskController.id;
+
         DeskController.id = localid;
         DeskController.canEat = false;
         DeskController.chooser('m');
@@ -93,7 +91,6 @@ public class ThingsToWorkWith {
         }
         checkers[localid].setWhChk('e');
         checkers[localprevid].setWhChk(rememberMe);
-
         //Буду ли я съеден, если не сдвинусь с места
         endangered = whosInDanger('y', localprevid, checkers);
         int damkoef = 0;
@@ -153,7 +150,7 @@ public class ThingsToWorkWith {
 
     //Методы для тестов
     //Создание поля с кастомной расстановкой шашек
-    public void myWorld(char[] checko) {
+    public static void myWorld(char[] checko) {
         Button button1 = new Button(), button2 = new Button(), button3 = new Button(), button4 = new Button(),
                 button5 = new Button(), button6 = new Button(), button7 = new Button(), button8 = new Button(),
                 button9 = new Button(), button10 = new Button(), button11 = new Button(), button12 = new Button(),

@@ -3,6 +3,8 @@ package com.bb;
 import javafx.scene.control.Button;
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class Tester {
@@ -35,7 +37,7 @@ class Tester {
 
         //Ход белой шашкой и её трансформация в дамку
         giver[5] = 'w';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         executor.move(1, 5);
         mustBe[1] = 'x';
         assertArrayEquals(mustBe, testing.getCheckers());
@@ -44,7 +46,7 @@ class Tester {
 
         //Ход чёрной шашки
         giver[0] = 'b';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         executor.move(5, 0);
         mustBe[5] = 'b';
         assertArrayEquals(mustBe, testing.getCheckers());
@@ -53,7 +55,7 @@ class Tester {
 
         //Ход чёрной шашки и её трансформация в дамку
         giver[24] = 'b';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         executor.move(30, 24);
         mustBe[30] = 'c';
         assertArrayEquals(mustBe, testing.getCheckers());
@@ -67,7 +69,7 @@ class Tester {
         //Ход белой шашки со взятием чёрной шашки
         giver[13] = 'w';
         giver[9] = 'b';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         testing.setId(6, 13, false);
         DeskController.checkers[9].setColor('b');
         executor.move(6, 13);
@@ -79,7 +81,7 @@ class Tester {
         //Ход белой шашки со взятием чёрной шашки и трансформацией в дамку
         giver[5] = 'b';
         giver[8] = 'w';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         testing.setId(1, 8, false);
         DeskController.checkers[5].setColor('b');
         executor.move(1, 8);
@@ -91,7 +93,7 @@ class Tester {
         //Ход чёрной шашки со взятием белой шашки
         giver[6] = 'b';
         giver[9] = 'w';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         testing.setId(13, 6, true);
         DeskController.checkers[9].setColor('b');
         executor.move(13, 6);
@@ -103,7 +105,7 @@ class Tester {
         //Ход чёрной шашки со взятием белой шашки и трансформацией в дамку
         giver[21] = 'b';
         giver[25] = 'w';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         testing.setId(30, 21, true);
         DeskController.checkers[25].setColor('b');
         executor.move(30, 21);
@@ -122,7 +124,7 @@ class Tester {
         giver[22] = 'b';
         giver[23] = 'b';
         giver[14] = 'b';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         DeskController.blackMove = false;
         executor.myTurn();
         mustBe[10] = 'w';
@@ -130,6 +132,48 @@ class Tester {
         assertArrayEquals(mustBe, testing.getCheckers());
         clearList(mustBe);
         clearList(giver);
+
+        //ИИ всех съедает и становится дамкой
+        giver[24] = 'w';
+        giver[21] = 'b';
+        giver[14] = 'b';
+        giver[7] = 'b';
+        ThingsToWorkWith.myWorld(giver);
+        DeskController.blackMove = false;
+        executor.myTurn();
+        mustBe[3] = 'x';
+        assertArrayEquals(mustBe, testing.getCheckers());
+        clearList(mustBe);
+        clearList(giver);
+
+        //Лабиринт: пройти через доску, не попав в зону поражения врага
+        giver[29] = 'w';
+        giver[12] = 'w';
+        giver[2] = 'w';
+        giver[22] = 'b';
+        giver[17] = 'b';
+        giver[4] = 'b';
+        giver[0] = 'b';
+        ThingsToWorkWith.myWorld(giver);
+        for (int i = 0; i < 7; i++) {
+            DeskController.blackMove = false;
+            DeskController.canEat = false;
+            executor.myTurn();
+            if (DeskController.checkers[16].getWhChk() == 'w')
+                DeskController.checkers[12].setWhChk('b');
+        }
+        for (int i = 0; i < 32; i++) {
+            if (DeskController.checkers[i].getWhChk() == 'x')
+                System.out.println(i);
+        }
+        mustBe = giver;
+        mustBe[29] = 'e';
+        mustBe[12] = 'b';
+        mustBe[1] = 'x';
+        assertArrayEquals(mustBe, testing.getCheckers());
+        clearList(mustBe);
+        clearList(giver);
+
     }
 
     void clearList(char[] list) {

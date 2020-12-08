@@ -178,7 +178,8 @@ public class DeskController implements Initializable {
         }
         if (shouldEat != 'm' && !canEat) {
             if (blackMove || checkers[id].getWhChk() == 'x' || checkers[id].getWhChk() == 'c') {
-                if ((checkers[id].getSpecialty2() == LeRi.Left && checkers[id].getSpecialty3() != UpDo.LowerLeft) || checkers[id].getSpecialty2() == LeRi.Right) {
+                if ((checkers[id].getSpecialty2() == LeRi.Left && checkers[id].getSpecialty3() != UpDo.LowerLeft) ||
+                        checkers[id].getSpecialty2() == LeRi.Right) {
                     if (checkers[id + 4].getWhChk() == 'e')
                         checkers[id + 4].recoloriser('y');
                 } else if (checkers[id].getSpecialty1() == OdEv.Odd && checkers[id].getSpecialty2() != LeRi.Right) {
@@ -186,7 +187,8 @@ public class DeskController implements Initializable {
                         checkers[id + 5].recoloriser('y');
                     if (checkers[id + 4].getWhChk() == 'e')
                         checkers[id + 4].recoloriser('y');
-                } else if (checkers[id].getSpecialty1() == OdEv.Even && checkers[id].getSpecialty2() != LeRi.Left && id <= 23) {
+                } else if (checkers[id].getSpecialty1() == OdEv.Even && checkers[id].getSpecialty2() != LeRi.Left &&
+                        id <= 23) {
                     if (checkers[id + 3].getWhChk() == 'e')
                         checkers[id + 3].recoloriser('y');
                     if (checkers[id + 4].getWhChk() == 'e')
@@ -194,7 +196,8 @@ public class DeskController implements Initializable {
                 }
             }
             if (!blackMove || checkers[id].getWhChk() == 'x' || checkers[id].getWhChk() == 'c') {
-                if ((checkers[id].getSpecialty2() == LeRi.Right && checkers[id].getSpecialty3() != UpDo.UpperRight) || checkers[id].getSpecialty2() == LeRi.Left) {
+                if ((checkers[id].getSpecialty2() == LeRi.Right && checkers[id].getSpecialty3() != UpDo.UpperRight) ||
+                        checkers[id].getSpecialty2() == LeRi.Left) {
                     if (checkers[id - 4].getWhChk() == 'e')
                         checkers[id - 4].recoloriser('y');
                 } else if (id >= 8 && checkers[id].getSpecialty2() != LeRi.Right && checkers[id].getSpecialty1() == OdEv.Odd) {
@@ -304,10 +307,9 @@ public class DeskController implements Initializable {
             }
         }, 0, 1000);*/
 
-
         System.out.println("My turn, hmpf!");
         Map<Integer, List<Integer>> waysToGo = new HashMap<>();
-        List<Integer> destinations = new ArrayList<>();
+        List<Integer> destinations;
         for (int i = 0; i < 32; i++) {
             if (checkers[i].getWhChk() == 'w' || checkers[i].getWhChk() == 'x') {
                 id = i;
@@ -329,7 +331,6 @@ public class DeskController implements Initializable {
             //Список возможных ходов и оценка их целесообразности
             maxrating = Integer.MIN_VALUE;
             List<List<Integer>> ratedOptions = new ArrayList<>();
-            destinations = new ArrayList<>();
             for (Map.Entry<Integer, List<Integer>> entry : waysToGo.entrySet())
                 for (Integer value : entry.getValue()) {
                     destinations = ThingsToWorkWith.rateOption(value, entry.getKey(), checkers);
@@ -357,7 +358,7 @@ public class DeskController implements Initializable {
             chooser('m');
             move(localid, localprevid);
             clearColors();
-
+            id = localid;
             isthereAKillStreak(localid, localprevid);
             clearColors();
             while (killStreak) {
