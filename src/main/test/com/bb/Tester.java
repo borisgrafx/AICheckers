@@ -3,8 +3,6 @@ package com.bb;
 import javafx.scene.control.Button;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class Tester {
@@ -28,7 +26,7 @@ class Tester {
 
         //Ход белой шашки
         giver[8] = 'w';
-        testing.myWorld(giver);
+        ThingsToWorkWith.myWorld(giver);
         executor.move(5, 8);
         mustBe[5] = 'w';
         assertArrayEquals(mustBe, testing.getCheckers());
