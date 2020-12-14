@@ -1,10 +1,13 @@
 package com.bb;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
+import javafx.scene.control.ChoiceBox;
 
 import java.net.URL;
 import java.util.*;
@@ -15,10 +18,11 @@ public class DeskController implements Initializable {
             button12, button13, button14, button15, button16, button17, button18, button19, button20, button21, button22,
             button23, button24, button25, button26, button27, button28, button29, button30, button31, button32;
     public CheckBox toggleAI;
-
+    public ObservableList<String> options = FXCollections.observableArrayList("Чёрные", "Белые");
     public static Button[] buttons;
     public static Checker[] checkers;
     public static boolean transBig = false, killStreak = false, canEat = false, blackMove = true;
+
     private boolean AI = false;
 
     public enum OdEv {
@@ -41,11 +45,35 @@ public class DeskController implements Initializable {
         NotSpecial
     }
 
+    /*@FXML
+    private final ChoiceBox<String> whoIsAI = new ChoiceBox<>(options);*/
+    @FXML
+    private ChoiceBox<String> whoIsAI;
+
+    @FXML
+    public void initChoiceBox() {
+        whoIsAI.getItems().addAll(options);
+        whoIsAI.setValue("Белые");
+    }
+
+    @FXML
+    public void gogogo(){
+        myTurn();/*
+        if (whoIsAI.getValue().equals(options.get(1)))
+            whoIsAI.setValue(options.get(0));
+        else whoIsAI.setValue(options.get(1));
+        handleAI();*/
+    }
+
     @FXML
     private void handleAI() {
         AI = toggleAI.isSelected();
         System.out.println(AI);
-        if (!blackMove) {
+        System.out.println(whoIsAI.getValue());
+        if (!blackMove && whoIsAI.getValue().equals(options.get(1)) && AI) {
+            clearColors();
+            myTurn();
+        } else if (blackMove && whoIsAI.getValue().equals(options.get(0)) && AI){
             clearColors();
             myTurn();
         }
@@ -53,6 +81,7 @@ public class DeskController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
+        initChoiceBox();
         buttons = new Button[]{button1, button2, button3, button4, button5, button6, button7, button8,
                 button9, button10, button11, button12, button13, button14, button15, button16, button17, button18,
                 button19, button20, button21, button22, button23, button24, button25, button26, button27, button28,
@@ -97,8 +126,10 @@ public class DeskController implements Initializable {
                 id = 0;
                 previd = -1;
                 clearColors();
-                if (!blackMove && AI)
+
+                if (((!blackMove && whoIsAI.getValue().equals(options.get(1))) || (blackMove && whoIsAI.getValue().equals(options.get(0)))) && AI)
                     myTurn();
+
             }
         } else if (!killStreak) {
             if (previd != id)
@@ -292,26 +323,21 @@ public class DeskController implements Initializable {
 
     //ИИ
     public void myTurn() {
-        /*AtomicBoolean nextPls = new AtomicBoolean(false);
-        ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
-        service.scheduleWithFixedDelay(
-                () -> { System.out.println("do task");
-                    nextPls.set(true);
-                },
-                2, 1,
-                TimeUnit.SECONDS);*/
-
-        /*Timer t = new Timer();
-        t.scheduleAtFixedRate(new TimerTask() {
-            public void run() {
-            }
-        }, 0, 1000);*/
+        char[] forWhite = new char[]{'w', 'x', 'b', 'c'};
+        char[] forBlack = new char[]{'b', 'c', 'w', 'x'};
+        char[] current;
+        if (blackMove) {
+            current = forBlack;
+        }
+        else {
+            current = forWhite;
+        }
 
         System.out.println("My turn, hmpf!");
         Map<Integer, List<Integer>> waysToGo = new HashMap<>();
         List<Integer> destinations;
         for (int i = 0; i < 32; i++) {
-            if (checkers[i].getWhChk() == 'w' || checkers[i].getWhChk() == 'x') {
+            if (checkers[i].getWhChk() == current[0] || checkers[i].getWhChk() == current[1]) {
                 id = i;
                 chooser('m');
                 if (!canEat)
@@ -333,7 +359,7 @@ public class DeskController implements Initializable {
             List<List<Integer>> ratedOptions = new ArrayList<>();
             for (Map.Entry<Integer, List<Integer>> entry : waysToGo.entrySet())
                 for (Integer value : entry.getValue()) {
-                    destinations = ThingsToWorkWith.rateOption(value, entry.getKey(), checkers);
+                    destinations = ThingsToWorkWith.rateOption(value, entry.getKey(), checkers, current);
                     ratedOptions.add(destinations);
                     System.out.println(destinations);
                 }
@@ -373,7 +399,7 @@ public class DeskController implements Initializable {
                     }
                 }
                 for (Integer val : destinations) {
-                    ratedOptions.add(ThingsToWorkWith.rateOption(val, localid, checkers));
+                    ratedOptions.add(ThingsToWorkWith.rateOption(val, localid, checkers, current));
                 }
                 to = new ArrayList<>();
                 for (List<Integer> curlist : ratedOptions)
@@ -390,7 +416,7 @@ public class DeskController implements Initializable {
                 bestWay = random.nextInt(to.size());
                 localid = to.get(bestWay);
                 move(localid, localprevid);
-                System.out.println(localprevid + " " + localid);
+                //System.out.println(localprevid + " " + localid);
                 isthereAKillStreak(localid, localprevid);
             }
 
@@ -399,7 +425,7 @@ public class DeskController implements Initializable {
             seeIfAnythingsEdible();
             clearColors();
         } catch (RuntimeException ignored) {
-            System.out.println("I can't go on");
+            //System.out.println("I can't go on");
         }
     }
 }

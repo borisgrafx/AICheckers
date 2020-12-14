@@ -172,6 +172,39 @@ class Tester {
         clearList(mustBe);
         clearList(giver);
 
+        //Вывести статистику AI VS AI
+        int b = 0;
+        int w = 0;
+        int draw = 0;
+        //Количество партий
+        int games = 50;
+        //Количество ходов до окончания партии
+        int moves = 1000;
+        for (int j = 0; j < games; j++) {
+            boolean areThereWhite = false;
+            boolean areThereBlack = false;
+            for (int i = 0; i < 12; i++)
+                giver[i] = 'b';
+            for (int i = 20; i < 32; i++)
+                giver[i] = 'w';
+            ThingsToWorkWith.myWorld(giver);
+            for (int i = 0; i < moves; i++) {
+                executor.myTurn();
+            }
+            for (int i = 0; i < 32; i++) {
+                if (DeskController.checkers[i].getWhChk() == 'w' || DeskController.checkers[i].getWhChk() == 'x')
+                    areThereWhite = true;
+                if (DeskController.checkers[i].getWhChk() == 'b' || DeskController.checkers[i].getWhChk() == 'c')
+                    areThereBlack = true;
+            }
+            if ((areThereBlack && areThereWhite) || (!areThereBlack && !areThereWhite))
+                draw += 1;
+            else if (areThereBlack)
+                b += 1;
+            else w += 1;
+            System.out.println("Game №" + j + " is done");
+        }
+        System.out.println("В результате " + games  + " игр по " + moves + " ходов " + w + " раз выиграли белые, " + b + " раз выиграли чёрные, " + draw + " раз была ничья");
     }
 
     void clearList(char[] list) {

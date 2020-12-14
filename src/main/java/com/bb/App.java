@@ -15,6 +15,7 @@ public class App extends Application {
     public void start(Stage stage) throws IOException {
         Scene scene = new Scene(loadFXML());
         stage.getIcons().add(new Image(App.class.getResourceAsStream("pics/checkas.png")));
+        stage.setTitle("Englishmen's Draughts");
         stage.setScene(scene);
         stage.show();
     }
