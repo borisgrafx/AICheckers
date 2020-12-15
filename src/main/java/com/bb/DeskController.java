@@ -333,7 +333,7 @@ public class DeskController implements Initializable {
             current = forWhite;
         }
 
-        System.out.println("My turn, hmpf!");
+        //System.out.println("My turn, hmpf!");
         Map<Integer, List<Integer>> waysToGo = new HashMap<>();
         List<Integer> destinations;
         for (int i = 0; i < 32; i++) {
@@ -361,7 +361,7 @@ public class DeskController implements Initializable {
                 for (Integer value : entry.getValue()) {
                     destinations = ThingsToWorkWith.rateOption(value, entry.getKey(), checkers, current);
                     ratedOptions.add(destinations);
-                    System.out.println(destinations);
+                    //System.out.println(destinations);
                 }
             //Выборка лучшего варианта
             int localid;
@@ -376,9 +376,10 @@ public class DeskController implements Initializable {
             int bestWay = random.nextInt(from.size());
             localprevid = from.get(bestWay);
             localid = to.get(bestWay);
-            System.out.println("Лучше схожу так " + localprevid + " " + localid + " потому что у него рейтинг " + maxrating);
-            if (localid == 0 && localprevid == 0)
+            //System.out.println("Лучше схожу так " + localprevid + " " + localid + " потому что у него рейтинг " + maxrating);
+            if (localid == 0 && localprevid == 0) {
                 System.out.println("Meh, I lost?");
+            }
             id = localprevid;
             clearColors();
             chooser('m');

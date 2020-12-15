@@ -160,10 +160,6 @@ class Tester {
             if (DeskController.checkers[16].getWhChk() == 'w')
                 DeskController.checkers[12].setWhChk('b');
         }
-        for (int i = 0; i < 32; i++) {
-            if (DeskController.checkers[i].getWhChk() == 'x')
-                System.out.println(i);
-        }
         mustBe = giver;
         mustBe[29] = 'e';
         mustBe[12] = 'b';
@@ -177,10 +173,10 @@ class Tester {
         int w = 0;
         int draw = 0;
         //Количество партий
-        int games = 50;
+        int games = 100;
         //Количество ходов до окончания партии
         int moves = 1000;
-        for (int j = 0; j < games; j++) {
+        for (int j = 1; j < games + 1; j++) {
             boolean areThereWhite = false;
             boolean areThereBlack = false;
             for (int i = 0; i < 12; i++)
@@ -202,7 +198,8 @@ class Tester {
             else if (areThereBlack)
                 b += 1;
             else w += 1;
-            System.out.println("Game №" + j + " is done");
+            if (j % 10 == 0)
+                System.out.println("Game №" + j + " is done");
         }
         System.out.println("В результате " + games  + " игр по " + moves + " ходов " + w + " раз выиграли белые, " + b + " раз выиграли чёрные, " + draw + " раз была ничья");
     }

@@ -19,14 +19,21 @@ public class ThingsToWorkWith {
         if (checkers[localprevid].getWhChk() == current[0] && (localprevid <= 7 && !DeskController.blackMove) || (localprevid >= 24 && DeskController.blackMove))
             rating += 4;
             //Проверка, стоит ли сбоку
-        else if (checkers[localprevid].getSpecialty2() == DeskController.LeRi.Left || checkers[localprevid].getSpecialty2() == DeskController.LeRi.Right) {
+        /*else if (checkers[localprevid].getSpecialty2() == DeskController.LeRi.Left || checkers[localprevid].getSpecialty2() == DeskController.LeRi.Right) {
             rating += 1;
             //System.out.println("Сбоку, сбоку заходи!!!");
-        }
+        }*/
         //Если не дамка, то стимулирует продвигаться вперёд
         if (checkers[localprevid].getWhChk() == current[0]) {
-            rating += 2;
+            rating += 4;
             //System.out.println("Вперёд, малой!");
+        }
+        //Если дамка и стоит на конце поля
+        if (checkers[localprevid].getWhChk() == current[1] && (localprevid <= 3 || localprevid >= 28)) {
+            rating += 3;
+        }
+        if (checkers[localprevid].getWhChk() == current[1] && (localid <= 3 || localid >= 28)) {
+            rating -= 4;
         }
         //Проверка, идёт ли дамка во вражескую зону
         if (checkers[localprevid].getWhChk() == current[1]) {
@@ -121,7 +128,8 @@ public class ThingsToWorkWith {
         return danger;
     }
 
-    private static int goQueen(int localid, Checker[] checkers, char[] current){
+    //Преследование королевой врагов
+    private static int goQueen(int localid, Checker[] checkers, char[] current) {
         int localrating = 0;
         boolean enemiesNearby = false;
         int i1;
@@ -147,7 +155,7 @@ public class ThingsToWorkWith {
             localrating += 1;
             //System.out.println("Дамка, враги рядом!");
         } else {
-            localrating -= 1;
+            localrating -= 3;
             //System.out.println("Дамка, врагов нет!");
         }
         return localrating;
