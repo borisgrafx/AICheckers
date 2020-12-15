@@ -12,12 +12,12 @@ public class ThingsToWorkWith {
         int rating = 0;
         List<Integer> result = new ArrayList<>();
 
-        List<Integer> endangered;
+        int endangered;
         char rememberMe;
         int a = DeskController.id;
         //Станет ли шашка дамкой?
         if (checkers[localprevid].getWhChk() == current[0] && (localprevid <= 7 && !DeskController.blackMove) || (localprevid >= 24 && DeskController.blackMove))
-            rating += 4;
+            rating += 5;
             //Проверка, стоит ли сбоку
         /*else if (checkers[localprevid].getSpecialty2() == DeskController.LeRi.Left || checkers[localprevid].getSpecialty2() == DeskController.LeRi.Right) {
             rating += 1;
@@ -25,7 +25,7 @@ public class ThingsToWorkWith {
         }*/
         //Если не дамка, то стимулирует продвигаться вперёд
         if (checkers[localprevid].getWhChk() == current[0]) {
-            rating += 4;
+            rating += 5;
             //System.out.println("Вперёд, малой!");
         }
         //Если дамка и стоит на конце поля
@@ -33,11 +33,37 @@ public class ThingsToWorkWith {
             rating += 3;
         }
         if (checkers[localprevid].getWhChk() == current[1] && (localid <= 3 || localid >= 28)) {
-            rating -= 4;
+            rating -= 4 ;
         }
         //Проверка, идёт ли дамка во вражескую зону
         if (checkers[localprevid].getWhChk() == current[1]) {
-            rating += goQueen(localid, checkers, current);
+            boolean enemiesNearby = false;
+            int i1;
+            int i2;
+            if (localid <= 5) {
+                i1 = 0;
+                i2 = 9;
+            } else if (localid >= 27) {
+                i1 = 21;
+                i2 = 31;
+            } else {
+                i1 = localid - 5;
+                i2 = localid + 5;
+            }
+
+            for (int i = i1; i <= i2; i++) {
+                if (checkers[i].getWhChk() == current[2] || checkers[i].getWhChk() == current[3]) {
+                    enemiesNearby = true;
+                    break;
+                }
+            }
+            if (enemiesNearby) {
+                rating += 1;
+                //System.out.println("Дамка, враги рядом!");
+            } else {
+                rating -= 3;
+                //System.out.println("Дамка, врагов нет!");
+            }
         }
         //Будет ли возможность убить врага в следующий раз
 
@@ -66,8 +92,8 @@ public class ThingsToWorkWith {
         checkers[localprevid].setWhChk('e');
         checkers[localid].setWhChk(current[0]);
         endangered = whosInDanger('y', localid, checkers, current);
-        if (endangered.size() != 0 && !eat) {
-            rating -= 11;
+        if (endangered != 0 && !eat) {
+            rating -= 13;
             //System.out.println("Не лезь, оно тебя сожрёт!!!");
         }
         checkers[localid].setWhChk('e');
@@ -77,7 +103,7 @@ public class ThingsToWorkWith {
         int damkoef = 0;
         if (checkers[localprevid].getWhChk() == current[1])
             damkoef = 4;
-        if (endangered.size() != 0) {
+        if (endangered != 0) {
             rating += 7 + damkoef;
             //System.out.println("Вали-ка лучше отсюдова");
         }
@@ -86,10 +112,10 @@ public class ThingsToWorkWith {
         rememberMe = checkers[localprevid].getWhChk();
         checkers[localprevid].setWhChk('e');
         checkers[localid].setWhChk(current[0]);
-        if (endangered.size() > whosInDanger('n', localid, checkers, current).size()) {
+        if (endangered > whosInDanger('n', localid, checkers, current)) {
             rating += 7;
             //System.out.println("Слава спасителю!");
-        } else if (endangered.size() < whosInDanger('n', localid, checkers, current).size()) {
+        } else if (endangered < whosInDanger('n', localid, checkers, current)) {
             rating -= 8;
             //System.out.println("Попридержи-ка коней");
         }
@@ -106,8 +132,8 @@ public class ThingsToWorkWith {
     }
 
     //Кто-нибудь (или я) в опасности?
-    private static List<Integer> whosInDanger(char me, int localprevid, Checker[] checkers, char[] current) {
-        List<Integer> danger = new ArrayList<>();
+    private static int whosInDanger(char me, int localprevid, Checker[] checkers, char[] current) {
+        int danger = 0;
         DeskController.blackMove = !DeskController.blackMove;
         DeskController.canEat = false;
         for (int i = 0; i < 32; i++) {
@@ -118,8 +144,7 @@ public class ThingsToWorkWith {
         for (int i = 0; i < 32; i++) {
             if ((me == 'n' && i != localprevid) || (me == 'y' && i == localprevid))
                 if (checkers[i].getColor() == 'b') {
-                    danger.add(i);
-                    break;
+                    danger++;
                 }
         }
         DeskController.blackMove = !DeskController.blackMove;
@@ -128,38 +153,6 @@ public class ThingsToWorkWith {
         return danger;
     }
 
-    //Преследование королевой врагов
-    private static int goQueen(int localid, Checker[] checkers, char[] current) {
-        int localrating = 0;
-        boolean enemiesNearby = false;
-        int i1;
-        int i2;
-        if (localid <= 5) {
-            i1 = 0;
-            i2 = 9;
-        } else if (localid >= 27) {
-            i1 = 21;
-            i2 = 31;
-        } else {
-            i1 = localid - 5;
-            i2 = localid + 5;
-        }
-
-        for (int i = i1; i <= i2; i++) {
-            if (checkers[i].getWhChk() == current[2] || checkers[i].getWhChk() == current[3]) {
-                enemiesNearby = true;
-                break;
-            }
-        }
-        if (enemiesNearby) {
-            localrating += 1;
-            //System.out.println("Дамка, враги рядом!");
-        } else {
-            localrating -= 3;
-            //System.out.println("Дамка, врагов нет!");
-        }
-        return localrating;
-    }
 
 
     //Методы для тестов
