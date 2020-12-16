@@ -201,7 +201,7 @@ class Tester {
             if (j % 10 == 0)
                 System.out.println("Game №" + j + " is done");
         }
-        System.out.println("В результате " + games  + " игр по " + moves + " ходов " + w + " раз выиграли белые, " + b + " раз выиграли чёрные, " + draw + " раз была ничья");
+        System.out.println("В результате " + games + " игр по " + moves + " ходов " + w + " раз выиграли белые, " + b + " раз выиграли чёрные, " + draw + " раз была ничья");
     }
 
     void clearList(char[] list) {

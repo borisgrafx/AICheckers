@@ -57,15 +57,6 @@ public class DeskController implements Initializable {
     }
 
     @FXML
-    public void gogogo(){
-        myTurn();/*
-        if (whoIsAI.getValue().equals(options.get(1)))
-            whoIsAI.setValue(options.get(0));
-        else whoIsAI.setValue(options.get(1));
-        handleAI();*/
-    }
-
-    @FXML
     private void handleAI() {
         AI = toggleAI.isSelected();
         System.out.println(AI);
@@ -73,7 +64,7 @@ public class DeskController implements Initializable {
         if (!blackMove && whoIsAI.getValue().equals(options.get(1)) && AI) {
             clearColors();
             myTurn();
-        } else if (blackMove && whoIsAI.getValue().equals(options.get(0)) && AI){
+        } else if (blackMove && whoIsAI.getValue().equals(options.get(0)) && AI) {
             clearColors();
             myTurn();
         }
@@ -328,8 +319,7 @@ public class DeskController implements Initializable {
         char[] current;
         if (blackMove) {
             current = forBlack;
-        }
-        else {
+        } else {
             current = forWhite;
         }
 

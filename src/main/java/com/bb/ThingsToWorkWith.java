@@ -18,7 +18,7 @@ public class ThingsToWorkWith {
         //Станет ли шашка дамкой?
         if (checkers[localprevid].getWhChk() == current[0] && (localprevid <= 7 && !DeskController.blackMove) || (localprevid >= 24 && DeskController.blackMove))
             rating += 5;
-            //Проверка, стоит ли сбоку
+        //Проверка, стоит ли сбоку
         /*else if (checkers[localprevid].getSpecialty2() == DeskController.LeRi.Left || checkers[localprevid].getSpecialty2() == DeskController.LeRi.Right) {
             rating += 1;
             //System.out.println("Сбоку, сбоку заходи!!!");
@@ -33,7 +33,7 @@ public class ThingsToWorkWith {
             rating += 3;
         }
         if (checkers[localprevid].getWhChk() == current[1] && (localid <= 3 || localid >= 28)) {
-            rating -= 4 ;
+            rating -= 4;
         }
         //Проверка, идёт ли дамка во вражескую зону
         if (checkers[localprevid].getWhChk() == current[1]) {
@@ -152,7 +152,6 @@ public class ThingsToWorkWith {
         DeskController.clearColors();
         return danger;
     }
-
 
 
     //Методы для тестов
